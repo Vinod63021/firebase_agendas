@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Firebase Roadmap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B1120;
+            --bg-card: #1E293B;
+            --bg-card-hover: #26334D;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --accent-firebase: #FFCA28;
+            --accent-github: #2EA44F;
+            --accent-local: #007ACC; /* VS Code Blue */
+            --accent-ai: #A855F7;
+            --accent-unlock: #4CAF50; /* Green for unlock section */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- HEADER ANIMATION --- */
+        header {
+            text-align: center;
+            margin: 60px 0 80px 0;
+            opacity: 0;
+            animation: fadeInDown 1s ease-out forwards;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-firebase) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- ROADMAP CONTAINER --- */
+        .roadmap {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* The main vertical timeline line */
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--accent-firebase), var(--accent-github), var(--accent-local), var(--accent-ai));
+            border-radius: 4px;
+            opacity: 0.3;
+        }
+
+        /* --- MODULE STYLES --- */
+        .module {
+            position: relative;
+            margin-bottom: 60px;
+            padding-left: 80px;
+            /* Hidden initially for scroll animation */
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* The class added by JS to trigger animation */
+        .module.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Timeline circular indicators */
+        .module-icon-marker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-main);
+            border: 4px solid var(--module-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+        
+        .module:hover .module-icon-marker {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .module-icon-marker img {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* --- CARD STYLES --- */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hover Effect: Lift and Glow */
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: var(--bg-card-hover);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+            border-color: var(--module-color);
+        }
+
+        /* Subtle color accent top border on cards */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--module-color);
+            opacity: 0.7;
+        }
+
+        .module-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Big Ghost Logo inside the card for style */
+        .ghost-logo {
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            opacity: 0.05;
+            width: 150px;
+            height: 150px;
+            pointer-events: none;
+            transform: rotate(15deg);
+            transition: all 0.5s ease;
+        }
+        .card:hover .ghost-logo {
+            opacity: 0.1;
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        .module-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--module-color);
+            color: var(--module-color);
+        }
+
+        /* --- AGENDA STYLES --- */
+        .agenda {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .agenda h3 {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .agenda-item {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .time-pill {
+            background: var(--module-color);
+            color: var(--bg-main);
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            min-width: 55px;
+            text-align: center;
+            margin-right: 20px;
+            margin-top: 3px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .details strong {
+            color: #fff;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .details ul {
+            list-style-type: none;
+            margin-top: 8px;
+        }
+
+        .details ul li {
+            margin-bottom: 6px;
+            padding-left: 15px;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .details ul li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--module-color);
+        }
+
+        /* --- UNLOCK NEW MODULES SECTION --- */
+        .unlock-section {
+            text-align: center;
+            margin: 80px auto;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border: 2px solid var(--accent-unlock);
+            transform: scale(0.9);
+            opacity: 0;
+            animation: bounceIn 1s ease-out forwards 0.5s; /* Delay animation */
+        }
+        .unlock-section.show { /* For scroll reveal */
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .unlock-section h3 {
+            font-size: 2rem;
+            color: var(--accent-unlock);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        .unlock-section h3 svg {
+            filter: drop-shadow(0 0 5px rgba(76, 175, 80, 0.5));
+        }
+
+        .unlock-section p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+        }
+        .unlock-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--accent-unlock);
+            color: var(--bg-main);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        .unlock-button:hover {
+            background-color: #66BB6A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            70% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1rem; }
+            .roadmap::before { left: 20px; }
+            .module { padding-left: 60px; margin-bottom: 40px; }
+            .module-icon-marker { width: 44px; height: 44px; left: 0; }
+            .module-icon-marker img { width: 22px; height: 22px; }
+            .unlock-section { padding: 30px 20px; margin: 60px auto; }
+            .unlock-section h3 { font-size: 1.5rem; flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Full Stack Roadmap</h1>
+            <p class="subtitle">Mastering the modern web with Firebase, GitHub, and AI tools.</p>
+        </header>
+
+        <div class="roadmap">
+
+            <div class="module" style="--module-color: var(--accent-firebase)">
+                <div class="module-icon-marker">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain-wordmark.svg" alt="Firebase Logo">
+                </div>
+
+                <div class="card">
+                    <img class="ghost-logo" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain-wordmark.svg" alt="Ghost Logo">
+                    <div class="module-header">
+                        <h2>Module 1: Firebase Studio</h2>
+                    </div>
+                    <div class="module-meta">
+                        <span class="tag">Focus: Cloud Backend Concept</span>
+                        <span class="tag">Goal: Navigation & Setup</span>
+                    </div>
+                    <div class="agenda">
+                        <h3>📝 Session Agenda</h3>
+                        <div class="agenda-item">
+                            <div class="time-pill">15m</div>
+                            <div class="details">
+                                <strong>Introduction</strong>
+                                What is Firebase? (It's a toolbox that handles the hard server stuff for us).
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">20m</div>
+                            <div class="details">
+                                <strong>Demo - The Studio Tour</strong>
+                                <ul>
+                                    <li>Creating a new project in Firebase Console.</li>
+                                    <li>Overview: Auth, Firestore Database, Hosting tabs.</li>
+                                    <li><em>Key concept: "This console is our command center."</em></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">40m</div>
+                            <div class="details">
+                                <strong>Student Activity</strong>
+                                <ul>
+                                    <li>Task: Create your own Firebase project.</li>
+                                    <li>Task: Enable "Hosting" in the console.</li>
+                                    <li>Task: Add a "Web App" to get configuration keys.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">15m</div>
+                            <div class="details">
+                                <strong>Wrap-up</strong>
+                                Q&A about what the console can do.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" style="--module-color: var(--accent-github)">
+                <div class="module-icon-marker">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo" style="filter: invert(1);">
+                </div>
+
+                <div class="card">
+                    <img class="ghost-logo" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="Ghost Logo" style="filter: invert(1); opacity: 0.03;">
+                    <div class="module-header">
+                        <h2>Module 2: Version Control</h2>
+                    </div>
+                    <div class="module-meta">
+                        <span class="tag">Focus: Code Safety Net</span>
+                        <span class="tag">Goal: Committing to Cloud</span>
+                    </div>
+                    <div class="agenda">
+                        <h3>📝 Session Agenda</h3>
+                        <div class="agenda-item">
+                            <div class="time-pill">15m</div>
+                            <div class="details">
+                                <strong>Theory</strong>
+                                Why do we need GitHub? (It's a "save game" slot for code).
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">25m</div>
+                            <div class="details">
+                                <strong>Demo - Basic Commands</strong>
+                                <ul>
+                                    <li>Creating a new Repository on GitHub.com.</li>
+                                    <li>Understanding <code>README.md</code> and <code>.gitignore</code>.</li>
+                                    <li>Web actions: Creating files online, committing, viewing history.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">35m</div>
+                            <div class="details">
+                                <strong>Student Activity</strong>
+                                <ul>
+                                    <li>Task: Create a "learning-repo".</li>
+                                    <li>Task: Create an index.html directly on GitHub to see version history.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">15m</div>
+                            <div class="details">
+                                <strong>Wrap-up</strong>
+                                Review terminology: Repository (folder), Commit (save point).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" style="--module-color: var(--accent-local)">
+                <div class="module-icon-marker">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code Logo">
+                </div>
+
+                <div class="card">
+                    <img class="ghost-logo" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="Ghost Logo">
+                    <div class="module-header">
+                        <h2>Module 3: Local Environment</h2>
+                    </div>
+                    <div class="module-meta">
+                        <span class="tag">Focus: Real Developer Tools</span>
+                        <span class="tag">Goal: Running Code Locally</span>
+                    </div>
+                    <div class="agenda">
+                        <h3>📝 Session Agenda</h3>
+                        <div class="agenda-item">
+                            <div class="time-pill">10m</div>
+                            <div class="details">
+                                <strong>Theory</strong>
+                                Why develop locally? (Faster, necessary for advanced tools).
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">40m</div>
+                            <div class="details">
+                                <strong>Installation Party (Guided)</strong>
+                                <ul>
+                                    <li>Step 1: Install VS Code (Editor).</li>
+                                    <li>Step 2: Install Node.js LTS (The Runtime).</li>
+                                    <li>Step 3: Install Git / Git Bash.</li>
+                                    <li>Step 4: Run <code>npm install -g firebase-tools</code>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">30m</div>
+                            <div class="details">
+                                <strong>Student Activity</strong>
+                                <ul>
+                                    <li>Verify versions: <code>node -v</code>, <code>git --version</code>, <code>firebase --version</code>.</li>
+                                    <li>Troubleshooting common path errors.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">10m</div>
+                            <div class="details">
+                                <strong>Wrap-up</strong>
+                                Celebrating the setup of a "Professional Environment."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module" style="--module-color: var(--accent-ai)">
+                <div class="module-icon-marker">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--accent-ai)" width="30px" height="30px"><path d="M21.87 15.846c-.955.569-2.13.754-3.222.545l1.69 2.829-2.586 1.545-1.512-2.532c-1.217.534-2.587.645-3.889.245-1.656-.509-3-1.75-3.73-3.318l-3.075 1.577-.905-1.765 1.472-.755c-.734-1.526-.853-3.271-.27-4.886.704-1.95 2.406-3.453 4.53-3.846l-.754-1.472 1.766-.905 1.576 3.075c1.568-.73 2.809-2.074 3.318-3.73.4-1.302.289-2.672-.245-3.889l2.532-1.511 1.545 2.586-2.829 1.689c.209 1.092.024 2.267-.545 3.222 1.356 1.328 2.046 3.234 1.826 5.163-.219 1.929-1.338 3.611-3.006 4.597zm-4.87-4.846c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5zm-6 0c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5z"/></svg>
+                </div>
+
+                <div class="card">
+                    <img class="ghost-logo" src="https://www.svgrepo.com/show/303649/ai.svg" alt="Ghost Logo" style="filter: invert(1); opacity: 0.03;">
+                    <div class="module-header">
+                        <h2>Module 4: AI Prompting & Debugging</h2>
+                    </div>
+                    <div class="module-meta">
+                        <span class="tag">Focus: AI Mentorship</span>
+                        <span class="tag">Goal: Fixing Errors Fast</span>
+                    </div>
+                    <div class="agenda">
+                        <h3>📝 Session Agenda</h3>
+                        <div class="agenda-item">
+                            <div class="time-pill">15m</div>
+                            <div class="details">
+                                <strong>Theory</strong>
+                                Garbage In, Garbage Out. Why saying "fix my code" isn't enough.
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">25m</div>
+                            <div class="details">
+                                <strong>Demo - The Perfect Prompt</strong>
+                                <ul>
+                                    <li>Structure: Role + Task + Context + Format.</li>
+                                    <li><em>Example: "Act as a Firebase expert. Write a login snippet using v9 modular SDK..."</em></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">20m</div>
+                            <div class="details">
+                                <strong>Demo - Error Handling</strong>
+                                <ul>
+                                    <li>Intentionally breaking code.</li>
+                                    <li>Copying the <em>entire</em> error message.</li>
+                                    <li>Pasting into AI with context.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="time-pill">30m</div>
+                            <div class="details">
+                                <strong>Student Activity</strong>
+                                <ul>
+                                    <li>Fix a broken piece of provided code using AI.</li>
+                                    <li>Generate a simple "Hello World" page using AI and run it.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="unlock-section">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--accent-unlock)" width="30px" height="30px"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>
+                Complete All Modules to Unlock New Challenges!
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--accent-unlock)" width="30px" height="30px"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>
+            </h3>
+            <p>Once you've mastered these foundational skills, a world of advanced Firebase features and full-stack development awaits you.</p>
+            <a href="#" class="unlock-button">Explore Advanced Topics</a>
+        </div>
+
+    </div>
+
+    <script>
+        // Intersection Observer for module animations
+        const moduleObserverOptions = {
+            threshold: 0.2 // Trigger when 20% of the element is visible
+        };
+
+        const moduleObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, moduleObserverOptions);
+
+        document.querySelectorAll('.module').forEach(module => {
+            moduleObserver.observe(module);
+        });
+
+        // Intersection Observer for the unlock section
+        const unlockObserverOptions = {
+            threshold: 0.5 // Trigger when 50% of the element is visible
+        };
+
+        const unlockObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                    unlockObserver.unobserve(entry.target); // Stop observing once animated
+                }
+            });
+        }, unlockObserverOptions);
+
+        const unlockSection = document.querySelector('.unlock-section');
+        if (unlockSection) {
+            unlockObserver.observe(unlockSection);
+        }
+    </script>
+</body>
+</html>
+```http://googleusercontent.com/image_generation_content/0
